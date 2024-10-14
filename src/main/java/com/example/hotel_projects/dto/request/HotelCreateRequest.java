@@ -1,7 +1,5 @@
 package com.example.hotel_projects.dto.request;
 
-import com.example.hotel_projects.dto.RoomDTO;
-import com.example.hotel_projects.entity.RoomEntity;
 import lombok.Data;
 
 import java.util.List;

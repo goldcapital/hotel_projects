@@ -5,13 +5,15 @@ import com.example.hotel_projects.enums.ProfileStatus;
 import com.example.hotel_projects.enums.RoomType;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(name = "room")
-public class RoomEntity  extends PersonEntity {
+public class RoomEntity extends PersonEntity {
 
-    @Column(name = "room_number", nullable = false,unique = true)
+    @Column(name = "room_number", nullable = false, unique = true)
     private String roomNumber;
 
     @Column(name = "capacity")
@@ -31,4 +33,7 @@ public class RoomEntity  extends PersonEntity {
     @ManyToOne
     @JoinColumn(name = "hotel_id", nullable = false)
     private HotelEntity hotel;
+   /* @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ReviewEntity> reviews;
+*/
 }

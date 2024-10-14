@@ -10,12 +10,13 @@ import java.time.LocalDate;
 @Table(name = "reservation")
 public class ReservationEntity extends PersonEntity {
 
+     @ManyToOne(fetch = FetchType.LAZY)
+     @JoinColumn(name = "guest_id",nullable = false)
+    private ProfileEntity guestId;
 
-    @Column(name = "guest_id", nullable = false)
-    private Long guestId;
-
-    @Column(name = "room_id", nullable = false)
-    private Long roomId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id",nullable = false)
+    private RoomEntity roomId;
 
     @Column(name = "check_in_date")
     private LocalDate checkInDate;

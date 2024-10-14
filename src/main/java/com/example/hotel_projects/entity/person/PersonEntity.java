@@ -11,7 +11,7 @@ public class PersonEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "creation_date")
+    @Column(name = "creationDate")
     private LocalDateTime creationDate=LocalDateTime.now();
     @Column(name = "visible")
     private Boolean visible=true;
