@@ -3,11 +3,12 @@ package com.example.hotel_projects.service;
 import com.example.hotel_projects.dto.HotelDTO;
 import com.example.hotel_projects.dto.page.PaginationResultDTO;
 import com.example.hotel_projects.dto.request.HotelCreateRequest;
+import com.example.hotel_projects.dto.request.HotelFilterDto;
 import com.example.hotel_projects.dto.request.HotelUpdateDto;
 import com.example.hotel_projects.entity.HotelEntity;
-import com.example.hotel_projects.entity.RegionEntity;
 import com.example.hotel_projects.enums.AppLanguage;
 import com.example.hotel_projects.exp.AppBadException;
+import com.example.hotel_projects.repository.filter.HotelCustomRepository;
 import com.example.hotel_projects.repository.HotelRepository;
 
 import jakarta.validation.Valid;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class HotelService {
     private final RegionService regionService;
     private final HotelRepository hotelRepository;
+    private final HotelCustomRepository hotelCustomRepository;
     private final RoomService roomService;
     private final ResourceBundleService resourceBundleService;
 
@@ -54,11 +56,15 @@ public class HotelService {
 
         HotelEntity hotelEntity = hotelRepository.findByName(name)
                 .orElseThrow(() -> new AppBadException(resourceBundleService.getMessage("no.hotel.with.this.name.was.found", appLanguage)));
-        if(request.getName()!=null) {
-         hotelEntity.setName(request.getName());
+        if (request.getName() != null) {
+            hotelEntity.setName(request.getName());
         }
-        hotelEntity.setNumberStars(request.getNumberStars());
-        hotelEntity.setVisible(request.getVisible());
+        if (request.getNumberStars() != 0){
+            hotelEntity.setNumberStars(request.getNumberStars());
+    }
+        if (request.getVisible()!=null) {
+            hotelEntity.setVisible(request.getVisible());
+        }
         return toDto(hotelRepository.save(hotelEntity));
     }
 
@@ -81,8 +87,6 @@ public class HotelService {
         entity.setName(request.getName());
         entity.setNumberStars(request.getNumberStars());
         entity.setRegionId(request.getRegionId());
-
-        // entity.setRoomList(roomService.getRoomList(request.getRoomList(), entity.getId()));
         return entity;
 
     }
@@ -138,4 +142,14 @@ public class HotelService {
     }
 
 
+    public PageImpl<HotelDTO> filter(HotelFilterDto dto, Integer page, Integer size) {
+        PaginationResultDTO<HotelEntity> paginationResult = hotelCustomRepository.filter(dto, page, size);
+
+        List<HotelDTO> dtoList = new LinkedList<>();
+        for (HotelEntity entity : paginationResult.getList()) {
+            dtoList.add(toDto(entity));
+        }
+
+        Pageable paging = PageRequest.of(page - 1, size);
+        return new PageImpl<>(dtoList, paging, paginationResult.getTotalSize());    }
 }

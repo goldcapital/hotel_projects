@@ -7,7 +7,6 @@ import lombok.Data;
 public class ReviewRequestDto {
 
     private Long reservationId;
-    private ReservationEntity reservation;
     private Integer rating;
     private String comment;
 }

@@ -38,5 +38,13 @@ public class ReviewController {
                                                  defaultValue = "uz") AppLanguage appLanguage){
         return ResponseEntity.ok(reviewService.delete(id,appLanguage));
     }
+    @PutMapping("/update/{reviewId}")
+    public ResponseEntity<ReviewDto>update(@PathVariable Long reviewId,
+                                           @RequestBody ReviewRequestDto dto,
+                                           @RequestHeader(value = "Accept-Language",
+                                                   defaultValue = "uz") AppLanguage appLanguage){
+        return ResponseEntity.ok(reviewService.update(reviewId,appLanguage,dto));
+
+    }
 
 }

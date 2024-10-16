@@ -1,6 +1,5 @@
 package com.example.hotel_projects.controller;
 
-import com.example.hotel_projects.dto.RegionDto;
 import com.example.hotel_projects.dto.ReservationDto;
 import com.example.hotel_projects.dto.request.ReservationRequestDto;
 import com.example.hotel_projects.dto.request.ReturnUserReservationsDto;

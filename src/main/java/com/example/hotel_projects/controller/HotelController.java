@@ -1,8 +1,8 @@
 package com.example.hotel_projects.controller;
 
 import com.example.hotel_projects.dto.HotelDTO;
-import com.example.hotel_projects.dto.RegionDto;
 import com.example.hotel_projects.dto.request.HotelCreateRequest;
+import com.example.hotel_projects.dto.request.HotelFilterDto;
 import com.example.hotel_projects.dto.request.HotelUpdateDto;
 import com.example.hotel_projects.enums.AppLanguage;
 import com.example.hotel_projects.service.HotelService;
@@ -76,5 +76,11 @@ public class HotelController {
                                                          @RequestParam(value = "size", defaultValue = "10") Integer size) {
         return ResponseEntity.ok(hotelService.pagination(page, size));
     }
-
+    @PostMapping("/filter")
+    public ResponseEntity<PageImpl<HotelDTO>> create(@RequestBody HotelFilterDto dto,
+                                                       @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                       @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        PageImpl<HotelDTO> result = hotelService.filter(dto, page, size);
+        return ResponseEntity.ok(result);
+    }
 }

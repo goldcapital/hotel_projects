@@ -71,20 +71,23 @@ public class RegionService {
         if (optional.isEmpty()) {
             throw new AppBadException(resourceBundleService.getMessage("region.not.found", appLanguage));
         }
-            RegionEntity regionEntity = optional.get();
+        RegionEntity regionEntity = optional.get();
 
-            if (dto.getId() != null) {
-                regionEntity.setId(dto.getId());
-            }
-            if (dto.getName() != null) {
-                regionEntity.setName(dto.getName());
-            }
+        if (dto.getId() != 0) {
+            regionEntity.setId(dto.getId());
+        }
+        if (dto.getName() != null) {
+            regionEntity.setName(dto.getName());
+        }
+        if (dto.getVisible() != null) {
+
 
             regionEntity.setVisible(dto.getVisible());
+        }
 
-            regionRepository.save(regionEntity);
+        regionRepository.save(regionEntity);
 
-            return toDto(regionEntity);
+        return toDto(regionEntity);
 
     }
 

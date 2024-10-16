@@ -55,7 +55,7 @@ public class ReviewService {
 
     public List<ReviewDto> getAll() {
         return  reviewRepository
-                .findAll()
+                .findAllByProfileId(SpringSecurityUtil.getCurrentUser().getId())
                 .stream()
                 .map(this::toDto)
                 .toList();
@@ -84,5 +84,22 @@ public class ReviewService {
         }
 
         throw new AppBadException(resourceBundleService.getMessage("item.not.found",appLanguage));
+    }
+
+    public ReviewDto update(Long reviewId, AppLanguage appLanguage, ReviewRequestDto dto) {
+        Optional<ReviewEntity>optional =reviewRepository.getByProfileIdAndReviewId(SpringSecurityUtil.getCurrentUser().getId(),reviewId);
+
+        if (optional.isPresent()){
+            ReviewEntity reviewEntity=optional.get();
+            if(dto.getRating()!=0) {
+                reviewEntity.setRating(dto.getRating());
+            }
+            if (dto.getComment()!=null){
+                reviewEntity.setComment(dto.getComment());
+            }
+           reviewRepository.save(reviewEntity);
+            return toDto(reviewEntity);
+        }
+        return null;
     }
 }

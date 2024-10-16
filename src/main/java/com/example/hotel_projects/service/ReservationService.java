@@ -131,10 +131,19 @@ public class ReservationService {
         Optional<ReservationEntity>optional=reservationRepository.findById(id);
         if (optional.isPresent()){
             ReservationEntity reservationEntity=optional.get();
-            reservationEntity.setRoomId(dto.getRoomId());
-            reservationEntity.setHotelId(dto.getHotelId());
-            reservationEntity.setCheckOutDate(dto.getCheckOutDate());
-            reservationEntity.setCheckInDate(dto.getCheckInDate());
+            if (dto.getRoomId()!=0) {
+                reservationEntity.setRoomId(dto.getRoomId());
+            }
+            if (dto.getHotelId()!=0) {
+                reservationEntity.setHotelId(dto.getHotelId());
+            }
+            if (dto.getCheckInDate()!=null) {
+                reservationEntity.setCheckInDate(dto.getCheckInDate());
+            }
+            if (dto.getCheckOutDate()!=null) {
+                reservationEntity.setCheckOutDate(dto.getCheckOutDate());
+            }
+
             reservationRepository.save(reservationEntity);
             return toDto(reservationEntity);
         }
