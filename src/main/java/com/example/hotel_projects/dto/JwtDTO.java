@@ -11,4 +11,9 @@ public class JwtDTO {
     private String email;
     private ProfileRole role;
     private AppLanguage appLanguage;
+
+    public JwtDTO(String email, ProfileRole role) {
+        this.email = email;
+        this.role = role;
+    }
 }

@@ -3,6 +3,7 @@ package com.example.hotel_projects.service;
 import com.example.hotel_projects.dto.HotelDTO;
 import com.example.hotel_projects.dto.page.PaginationResultDTO;
 import com.example.hotel_projects.dto.request.HotelCreateRequest;
+import com.example.hotel_projects.dto.request.HotelUpdateDto;
 import com.example.hotel_projects.entity.HotelEntity;
 import com.example.hotel_projects.entity.RegionEntity;
 import com.example.hotel_projects.enums.AppLanguage;
@@ -32,7 +33,7 @@ public class HotelService {
         regionService.getRegionById(hotelDTO.getRegionId(), appLanguage);
         hotelRepository.save(toEntity(hotelDTO));
 
-        return toDto(setByNameAndRoomList(hotelDTO,appLanguage));
+        return toDto(setByNameAndRoomList(hotelDTO, appLanguage));
 
     }
 
@@ -49,21 +50,15 @@ public class HotelService {
 
     }
 
-    public HotelDTO update(String name, HotelCreateRequest request, AppLanguage appLanguage) {
+    public HotelDTO update(String name, HotelUpdateDto request, AppLanguage appLanguage) {
 
         HotelEntity hotelEntity = hotelRepository.findByName(name)
                 .orElseThrow(() -> new AppBadException(resourceBundleService.getMessage("no.hotel.with.this.name.was.found", appLanguage)));
-
-
-        RegionEntity regionEntity = new RegionEntity();
-        regionEntity.setId(request.getRegionId());
-
-        hotelEntity.setName(request.getName());
+        if(request.getName()!=null) {
+         hotelEntity.setName(request.getName());
+        }
         hotelEntity.setNumberStars(request.getNumberStars());
-        hotelEntity.setRegionId(regionEntity);
         hotelEntity.setVisible(request.getVisible());
-        hotelEntity.setRoomList(roomService.getRoomList(request.getRoomList(), hotelEntity.getId()));
-
         return toDto(hotelRepository.save(hotelEntity));
     }
 
@@ -73,7 +68,7 @@ public class HotelService {
 
         dto.setHotelId(entity.getId());
         dto.setHotelName(entity.getName());
-        dto.setRegionId(entity.getRegionId().getId());
+        dto.setRegionId(entity.getRegionId());
         dto.setNumberStars(entity.getNumberStars());
 
         dto.setRoomList(roomService.getRoomEntityList(entity));
@@ -83,14 +78,11 @@ public class HotelService {
 
     private HotelEntity toEntity(HotelCreateRequest request) {
         HotelEntity entity = new HotelEntity();
-
-        RegionEntity regionEntity = new RegionEntity();
-        regionEntity.setId(request.getRegionId());
-
         entity.setName(request.getName());
         entity.setNumberStars(request.getNumberStars());
-        entity.setRegionId(regionEntity);
-      //  entity.setRoomList(roomService.getRoomList(request.getRoomList(), entity.getId()));
+        entity.setRegionId(request.getRegionId());
+
+        // entity.setRoomList(roomService.getRoomList(request.getRoomList(), entity.getId()));
         return entity;
 
     }
@@ -103,15 +95,16 @@ public class HotelService {
     }
 
     public HotelDTO getByName(String name, AppLanguage appLanguage) {
+
         return hotelRepository.findByName(name)
                 .map(this::toDto).orElseThrow(()
                         -> new AppBadException(resourceBundleService
                         .getMessage("no.hotel.with.this.name.was.found", appLanguage)));
     }
 
-    private  HotelEntity setByNameAndRoomList(HotelCreateRequest hotelDTO,AppLanguage appLanguage){
+    private HotelEntity setByNameAndRoomList(HotelCreateRequest hotelDTO, AppLanguage appLanguage) {
 
-        Optional<HotelEntity>optional=hotelRepository.findByName(hotelDTO.getName());
+        Optional<HotelEntity> optional = hotelRepository.findByName(hotelDTO.getName());
 
         if (optional.isPresent()) {
             HotelEntity entity = optional.get();
@@ -123,12 +116,12 @@ public class HotelService {
         return null;
     }
 
-    public PageImpl<HotelDTO>pagination(Integer page, Integer size) {
+    public PageImpl<HotelDTO> pagination(Integer page, Integer size) {
 
         Sort sort = Sort.by(Sort.Direction.DESC, "creationDate");
         Pageable paging = PageRequest.of(page - 1, size, sort);
 
-        Page<HotelEntity> studentPage = hotelRepository.findAll(paging);
+        Page<HotelEntity> studentPage = hotelRepository.findAllByVisible(true,paging);
 
         List<HotelEntity> entityList = studentPage.getContent();
         Long totalElements = studentPage.getTotalElements();
@@ -138,6 +131,10 @@ public class HotelService {
             dtoList.add(toDto(entity));
         }
         return new PageImpl<>(dtoList, paging, totalElements);
+    }
+
+    public HotelDTO getByIdHotel(Long id) {
+        return hotelRepository.findById(id).map(this::toDto).orElse(null);
     }
 
 

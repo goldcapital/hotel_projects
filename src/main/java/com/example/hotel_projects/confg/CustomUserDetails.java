@@ -4,7 +4,7 @@ package com.example.hotel_projects.confg;
 
 
 import com.example.hotel_projects.enums.ProfileRole;
-import com.example.hotel_projects.enums.ProfileStatus;
+import com.example.hotel_projects.enums.Status;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,7 +13,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 
 public class CustomUserDetails implements UserDetails {
     @Getter
@@ -21,10 +20,10 @@ public class CustomUserDetails implements UserDetails {
     @Getter
     private String email;
     private String password;
-    private ProfileStatus status;
+    private Status status;
     private ProfileRole role;
 
-    public CustomUserDetails(String id, String email,  String password, ProfileStatus status, ProfileRole role) {
+    public CustomUserDetails(String id, String email, String password, Status status, ProfileRole role) {
         this.id = id;
         this.email = email;
 
@@ -69,7 +68,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return status.equals(ProfileStatus.ACTIVE);
+        return status.equals(Status.ACTIVE);
     }
 
 }

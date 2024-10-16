@@ -7,23 +7,17 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "reviews")
-public class ReviewEntity  extends PersonEntity {
+public class ReviewEntity extends PersonEntity {
 
+    @Column(name = "reservation_id",nullable = false)
+    private Long reservationId;
     @ManyToOne
-    @JoinColumn(name = "room_id", nullable = false)
-    private RoomEntity room;
-
-    @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    private ProfileEntity customer;
-
-    @ManyToOne
-    @JoinColumn(name = "hotel_id", nullable = false)
-    private HotelEntity hotel;
+    @JoinColumn(name = "reservation_id", insertable = false, updatable = false)
+    private ReservationEntity reservation;
 
     @Column(name = "rating", nullable = false)
-    private Integer rating; // Baholash reytingi (masalan, 1 dan 5 gacha)
+    private Integer rating;
 
-    @Column(name = "comment",columnDefinition = "TEXT")
-    private String comment; // Baholash uchun izoh
+    @Column(name = "comment", columnDefinition = "TEXT")
+    private String comment;
 }

@@ -3,7 +3,7 @@ package com.example.hotel_projects.service;
 
 import com.example.hotel_projects.entity.ProfileEntity;
 import com.example.hotel_projects.enums.ProfileRole;
-import com.example.hotel_projects.enums.ProfileStatus;
+import com.example.hotel_projects.enums.Status;
 import com.example.hotel_projects.repository.ProfileRepository;
 import com.example.hotel_projects.utl.MDUtil;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,7 @@ public class InitAminService {
         profile.setPassword(MDUtil.encode("1234"));
         profile.setRole(ProfileRole.ROLE_ADMIN);
         profile.setName("aliy");
-        profile.setStatus(ProfileStatus.ACTIVE);
+        profile.setStatus(Status.ACTIVE);
         Optional<ProfileEntity>optional=profileRepository.findByEmail(profile.getEmail());
         if (optional.isEmpty()) {
             profileRepository.save(profile);

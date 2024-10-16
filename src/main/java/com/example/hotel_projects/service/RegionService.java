@@ -1,8 +1,6 @@
 package com.example.hotel_projects.service;
 
-import com.example.hotel_projects.dto.HotelDTO;
 import com.example.hotel_projects.dto.RegionDto;
-import com.example.hotel_projects.entity.HotelEntity;
 import com.example.hotel_projects.entity.RegionEntity;
 import com.example.hotel_projects.enums.AppLanguage;
 import com.example.hotel_projects.exp.AppBadException;
@@ -22,11 +20,11 @@ public class RegionService {
     private final RegionRepository regionRepository;
 
     public List<RegionDto> getAll() {
-   return regionRepository.findAll().stream().map(this::toDto).toList();
+        return regionRepository.findAll().stream().map(this::toDto).toList();
 
     }
 
-    public RegionDto createRegion(String name,AppLanguage appLanguage) {
+    public RegionDto createRegion(String name, AppLanguage appLanguage) {
         Optional<RegionEntity> optional = regionRepository.findByNameAndVisible(name, true);
 
         if (optional.isEmpty()) {
@@ -36,18 +34,16 @@ public class RegionService {
             return toDto(regionEntity);
         }
 
-        throw new AppBadException(resourceBundleService.getMessage("this.region.exists",appLanguage));
+        throw new AppBadException(resourceBundleService.getMessage("this.region.exists", appLanguage));
     }
 
     public RegionDto getById(Long id, AppLanguage appLanguage) {
-        return toDto(getRegionById(id,appLanguage));
+        return toDto(getRegionById(id, appLanguage));
     }
 
     public RegionEntity getRegionById(Long regionId, AppLanguage appLanguage) {
 
-        return regionRepository.findByIdAndVisible(regionId, true)
-                .orElseThrow(() -> new AppBadException(resourceBundleService
-                        .getMessage("region.not.found", appLanguage)));
+        return regionRepository.findByIdAndVisible(regionId, true).orElseThrow(() -> new AppBadException(resourceBundleService.getMessage("region.not.found", appLanguage)));
     }
 
     private RegionDto toDto(RegionEntity regionEntity) {
@@ -61,7 +57,7 @@ public class RegionService {
     }
 
     public RegionDto delete(Long id, AppLanguage appLanguage) {
-        RegionEntity regionEntity=getRegionById(id,appLanguage);
+        RegionEntity regionEntity = getRegionById(id, appLanguage);
 
         regionEntity.setVisible(false);
         regionRepository.save(regionEntity);
@@ -69,15 +65,28 @@ public class RegionService {
         return toDto(regionEntity);
     }
 
-    public Boolean update(RegionDto dto, AppLanguage appLanguage) {
-        RegionEntity regionEntity=getRegionById(dto.getId(),appLanguage);
+    public RegionDto update(Long regionId, RegionDto dto, AppLanguage appLanguage) {
+        Optional<RegionEntity> optional = regionRepository.getByIdRegion(regionId);
 
-            regionEntity.setName(dto.getName());
-            regionEntity.setVisible(dto.getVisible());
-            regionEntity.setCreationDate(dto.getCreationDate());
-
-            return true;
+        if (optional.isEmpty()) {
+            throw new AppBadException(resourceBundleService.getMessage("region.not.found", appLanguage));
         }
+            RegionEntity regionEntity = optional.get();
+
+            if (dto.getId() != null) {
+                regionEntity.setId(dto.getId());
+            }
+            if (dto.getName() != null) {
+                regionEntity.setName(dto.getName());
+            }
+
+            regionEntity.setVisible(dto.getVisible());
+
+            regionRepository.save(regionEntity);
+
+            return toDto(regionEntity);
+
+    }
 
     public PageImpl<RegionDto> pagination(Integer page, Integer size) {
         Sort sort = Sort.by(Sort.Direction.DESC, "creationDate");

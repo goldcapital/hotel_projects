@@ -16,9 +16,12 @@ public class HotelEntity extends PersonEntity {
     @Column(name = "hotel_name", nullable = false, unique = true)
     private String name;
 
+    @Column(name = "region_id",nullable = false)
+    private Long regionId;
+
     @ManyToOne
-    @JoinColumn(name = "region_id", nullable = false)
-    private RegionEntity regionId;
+    @JoinColumn(name = "region_id", insertable = false, updatable = false)
+    private RegionEntity region;
 
     @Column(name = "nuber_stars")
     private Integer numberStars;

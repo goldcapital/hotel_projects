@@ -9,7 +9,7 @@ import com.example.hotel_projects.entity.person.EmailHistoryEntity;
 import com.example.hotel_projects.entity.ProfileEntity;
 import com.example.hotel_projects.enums.AppLanguage;
 import com.example.hotel_projects.enums.ProfileRole;
-import com.example.hotel_projects.enums.ProfileStatus;
+import com.example.hotel_projects.enums.Status;
 import com.example.hotel_projects.exp.AppBadException;
 import com.example.hotel_projects.repository.EmailHistoryRepository;
 import com.example.hotel_projects.repository.ProfileRepository;
@@ -37,40 +37,41 @@ public class AuthService {
     private final EmailHistoryRepository emailHistoryRepository;
 
     public ProfileDTO loge(ProfileLoginRequestDTO dto, AppLanguage appLanguage) {
-        ProfileEntity entity =getByEmail(dto.getEmail(),appLanguage);
+        ProfileEntity entity = getByEmail(dto.getEmail(), appLanguage);
 
-        if (entity.getStatus().equals(ProfileStatus.ACTIVE)
+        if (entity.getStatus().equals(Status.ACTIVE)
                 && entity.getPassword().
                 equals(MDUtil.encode(dto.getPassword()))) {
-            String jwt=JWTUtil.encode(entity.getEmail(),entity.getRole(),appLanguage);
+            String jwt = JWTUtil.encode(entity.getEmail(), entity.getRole(), appLanguage);
 
-          String txt=  sendEmailVerification(jwt,"Siz bizning Hotel saytimizga ushbu email orqali kirishga harakat qildingiz." +
-                  " Agar bu siz bo'lsangiz, iltimos tasdiqlang yoki rad eting");
+            String txt = sendEmailVerification(jwt, "Siz bizning Hotel saytimizga ushbu email orqali kirishga harakat qildingiz." +
+                    " Agar bu siz bo'lsangiz, iltimos tasdiqlang yoki rad eting");
             mailSenderService.sendEmail(entity.getEmail(), "Check login", txt);
-            profileRepository.updateByLoggedInAndEmail(true,entity.getEmail());
+            profileRepository.updateByLoggedInAndEmail(true, entity.getEmail());
 
-            return toDto(entity,jwt);
+            return toDto(entity, jwt);
         }
         throw new AppBadException(resourceBundleService.getMessage("email.password.wrong", appLanguage));
 
     }
+
     public String registrationEmail(AuthRegistrationRequest dto, AppLanguage appLanguage) {
-        if(!validateUserRegistrationAttempt(dto,appLanguage)){
+        if (!validateUserRegistrationAttempt(dto, appLanguage)) {
 
         }
-        ProfileEntity entity=entityDto(dto);
+        ProfileEntity entity = entityDto(dto);
 
-        String jwt= JWTUtil.encode(entity.getEmail(),entity.getRole(),appLanguage);
+        String jwt = JWTUtil.encode(entity.getEmail(), entity.getRole(), appLanguage);
 
-        String text=sendVerificationEmail(entity,jwt);
+        String text = sendVerificationEmail(entity, jwt);
         mailSenderService.sendEmail(entity.getEmail(), "Complete registration", text);
 
-        var emailHistoryEntity=new EmailHistoryEntity();
+        var emailHistoryEntity = new EmailHistoryEntity();
         emailHistoryEntity.setEmail(dto.getEmail());
         emailHistoryEntity.setMessage(text);
         emailHistoryRepository.save(emailHistoryEntity);
 
-       String message=resourceBundleService.getMessage("please.confirm.email",appLanguage);
+        String message = resourceBundleService.getMessage("please.confirm.email", appLanguage);
         return message;
 
     }
@@ -79,7 +80,7 @@ public class AuthService {
 
         Optional<ProfileEntity> optional = profileRepository.findByEmail(dto.getEmail());
         if (optional.isPresent()) {
-            if (optional.get().getStatus().equals(ProfileStatus.REGISTRATION)) {
+            if (optional.get().getStatus().equals(Status.REGISTRATION)) {
                 profileRepository.deleteByEmail(optional.get().getEmail());
 
                 LocalDateTime from = LocalDateTime.now().minusMinutes(1);
@@ -95,66 +96,81 @@ public class AuthService {
         return true;
     }
 
-public Boolean emailVerification(String token) {
-       JwtDTO jwtDTO=decode(token);
+    public Boolean emailVerification(String token) {
+        JwtDTO jwtDTO = decode(token);
 
-    ProfileEntity profileEntity=getByEmail(jwtDTO.getEmail(), jwtDTO.getAppLanguage());
+        ProfileEntity profileEntity = getByEmail(jwtDTO.getEmail(), jwtDTO.getAppLanguage());
 
-    if (!profileEntity.getStatus().equals(ProfileStatus.ACTIVE)) {
-        profileRepository.updateByEmail(ProfileStatus.ACTIVE, jwtDTO.getEmail());
-        return true;
+        if (!profileEntity.getStatus().equals(Status.ACTIVE)) {
+            profileRepository.updateByEmail(Status.ACTIVE, jwtDTO.getEmail());
+            return true;
+        }
+        throw new AppBadException(resourceBundleService.getMessage("This.email.has.been.registered", jwtDTO.getAppLanguage()));
     }
-    throw new AppBadException(resourceBundleService.getMessage("This.email.has.been.registered",jwtDTO.getAppLanguage()));
-}
 
 
-    private ProfileEntity getByEmail(String email,AppLanguage appLanguage){
-    Optional<ProfileEntity> optional = Optional.ofNullable(profileRepository.findByEmail(email)
-            .orElseThrow(() -> new AppBadException(resourceBundleService.getMessage("item.not.found", appLanguage))));
-    return optional.get();
+    private ProfileEntity getByEmail(String email, AppLanguage appLanguage) {
+        Optional<ProfileEntity> optional = Optional.ofNullable(profileRepository.findByEmail(email)
+                .orElseThrow(() -> new AppBadException(resourceBundleService.getMessage("item.not.found", appLanguage))));
+        return optional.get();
 
-}
+    }
+
     public Boolean emailVerificationPermission(String token) {
 
-        ProfileEntity profileEntity=getProfileToken(token);
-        if(!profileEntity.isLoggedIn()){
-          profileRepository.updateByLoggedInAndEmail(true,profileEntity.getEmail());
-          return true;
-        }
-        return null;
-    }
-    public Boolean emailVerificationRejection(String token) {
-        ProfileEntity profileEntity=getProfileToken(token);
-        if(profileEntity.isLoggedIn()){
-            profileRepository.updateByLoggedInAndEmail(false,profileEntity.getEmail());
+        ProfileEntity profileEntity = getProfileToken(token);
+        if (!profileEntity.isLoggedIn()) {
+            profileRepository.updateByLoggedInAndEmail(true, profileEntity.getEmail());
             return true;
         }
         return null;
     }
 
-    private  ProfileEntity entityDto(AuthRegistrationRequest dto){
+    public Boolean emailVerificationRejection(String token) {
+        ProfileEntity profileEntity = getProfileToken(token);
+        if (profileEntity.isLoggedIn()) {
+            profileRepository.updateByLoggedInAndEmail(false, profileEntity.getEmail());
+            return true;
+        }
+        return null;
+    }
+
+    private ProfileEntity entityDto(AuthRegistrationRequest dto) {
         ProfileEntity entity = new ProfileEntity();
         entity.setRole(ProfileRole.ROLE_USER);
         entity.setEmail(dto.getEmail());
         entity.setPassword(MDUtil.encode(dto.getPassword()));
-        entity.setStatus(ProfileStatus.REGISTRATION);
+        entity.setStatus(Status.REGISTRATION);
         entity.setName(dto.getUsername());
 
         profileRepository.save(entity);
         return entity;
     }
-    private  ProfileEntity getProfileToken(String token){
-        JwtDTO jwtDTO=decode(token);
-        ProfileEntity profileEntity=getByEmail(jwtDTO.getEmail(), jwtDTO.getAppLanguage());
+
+    private ProfileEntity getProfileToken(String token) {
+        JwtDTO jwtDTO = decode(token);
+        ProfileEntity profileEntity = getByEmail(jwtDTO.getEmail(), jwtDTO.getAppLanguage());
         return profileEntity;
     }
 
-    private ProfileDTO toDto(ProfileEntity entity, String jwt){
-        ProfileDTO dto=new ProfileDTO();
+    private ProfileDTO toDto(ProfileEntity entity, String jwt) {
+        ProfileDTO dto = new ProfileDTO();
 
         dto.setEmail(entity.getEmail());
         dto.setJwtToken(jwt);
 
         return dto;
+    }
+
+    public ProfileDTO getAdminToken(AppLanguage appLanguage) {
+        Optional<ProfileEntity>optional=profileRepository.findByEmail("admin@gmail.com");
+        if (optional.isPresent()){
+            ProfileEntity profile=optional.get();
+            ProfileDTO profileDTO=new ProfileDTO();
+            profileDTO.setJwtToken(JWTUtil.encode(profile.getEmail(), profile.getRole(),appLanguage));
+            return profileDTO;
+        }
+        return null;
+
     }
 }

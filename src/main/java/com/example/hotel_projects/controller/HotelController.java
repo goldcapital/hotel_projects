@@ -3,6 +3,7 @@ package com.example.hotel_projects.controller;
 import com.example.hotel_projects.dto.HotelDTO;
 import com.example.hotel_projects.dto.RegionDto;
 import com.example.hotel_projects.dto.request.HotelCreateRequest;
+import com.example.hotel_projects.dto.request.HotelUpdateDto;
 import com.example.hotel_projects.enums.AppLanguage;
 import com.example.hotel_projects.service.HotelService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,7 +48,7 @@ public class HotelController {
     @PutMapping("/update/{name}")
     @Operation(summary = "Api for Hotel update", description = "by this api admin to update hotel")
     public ResponseEntity<HotelDTO> update(@PathVariable String name,
-                                           @RequestBody HotelCreateRequest hotelDTO,
+                                           @RequestBody HotelUpdateDto hotelDTO,
                                            @RequestHeader(value = "Accept-Language",
                                                    defaultValue = "uz") AppLanguage appLanguage) {
 
@@ -68,10 +69,11 @@ public class HotelController {
                                                       defaultValue = "uz") AppLanguage appLanguage) {
         return ResponseEntity.ok(hotelService.getByName(name, appLanguage));
     }
+
     @GetMapping("/pagination")
     @Operation(summary = "Api for Hotel get pagination", description = "by this api  to get pagination hotel")
     public ResponseEntity<PageImpl<HotelDTO>> pagination(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                          @RequestParam(value = "size", defaultValue = "10") Integer size) {
+                                                         @RequestParam(value = "size", defaultValue = "10") Integer size) {
         return ResponseEntity.ok(hotelService.pagination(page, size));
     }
 

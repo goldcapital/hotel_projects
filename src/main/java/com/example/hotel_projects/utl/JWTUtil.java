@@ -18,7 +18,6 @@ public class JWTUtil {
 
         SignatureAlgorithm sa = SignatureAlgorithm.HS512;
         SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), sa.getJcaName());
-        // Token yaratish jarayoni
         return Jwts.builder()
                 .setIssuedAt(new Date())
                 .signWith(secretKeySpec, sa)
@@ -45,11 +44,13 @@ public class JWTUtil {
         String email = claims.get("email", String.class);
         String role = claims.get("role", String.class);
         String appLanguage = claims.get("appLanguage", String.class);
-
-        AppLanguage appLanguageEnum = AppLanguage.valueOf(appLanguage);
         ProfileRole profileRoleEnum = ProfileRole.valueOf(role);
+      if(appLanguage!=null) {
+          AppLanguage appLanguageEnum = AppLanguage.valueOf(appLanguage);
+          return new JwtDTO(email, profileRoleEnum,appLanguageEnum);
 
-            return new JwtDTO(email, profileRoleEnum, appLanguageEnum);
+      }
+            return new JwtDTO(email, profileRoleEnum);
 
     }
 }

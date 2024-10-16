@@ -1,5 +1,5 @@
 package com.example.hotel_projects.enums;
 
 public enum AppLanguage {
-    uz,ru,en
+    uz,ru, DEFAULT, en
 }

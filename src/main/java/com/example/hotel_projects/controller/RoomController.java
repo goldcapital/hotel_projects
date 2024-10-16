@@ -6,6 +6,7 @@ import com.example.hotel_projects.dto.request.RoomRequestDto;
 import com.example.hotel_projects.enums.AppLanguage;
 import com.example.hotel_projects.service.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,6 @@ public class RoomController {
     private final RoomService roomService;
 
 
-
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/create")
     @Operation(summary = "Api for Room create", description = "by this api admin to create Room")
@@ -31,10 +31,11 @@ public class RoomController {
         return ResponseEntity.ok(roomService.createRoom(dto, appLanguage));
 
     }
-    @GetMapping("/getAll")
+
+    @GetMapping("/getAll/{hotelId}")
     @Operation(summary = "Api for Hotel get all", description = "by this api  to get all hotel")
-    public ResponseEntity<List<RoomDTO>> getAllRoom() {
-        return ResponseEntity.ok(roomService.getRoomAll());
+    public ResponseEntity<List<RoomDTO>> getAllRoom(@PathVariable Long hotelId) {
+        return ResponseEntity.ok(roomService.getRoomAll(hotelId));
     }
 
     @GetMapping("/get_room/{number}")
@@ -60,9 +61,9 @@ public class RoomController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update")
     @Operation(summary = "Api for Hotel update", description = "by this api admin to update hotel")
-    public ResponseEntity<Boolean> updateRoom(@RequestParam("number") String roomNumber,
+    public ResponseEntity<Boolean> updateRoom(@Valid @RequestBody RoomDTO roomDTO,
+                                              @RequestParam("roomNumber") String roomNumber,
                                               @RequestParam("hotelId") Long hotelId,
-                                              @RequestBody RoomDTO roomDTO,
                                               @RequestHeader(value = "Accept-Language",
                                                       defaultValue = "uz") AppLanguage appLanguage) {
         return ResponseEntity.ok(roomService.updateRoom(roomNumber, roomDTO, hotelId, appLanguage));
@@ -71,7 +72,8 @@ public class RoomController {
     @GetMapping("/pagination")
     @Operation(summary = "Api for Hotel get pagination", description = "by this api  to get pagination hotel")
     public ResponseEntity<PageImpl<RoomDTO>> pagination(@RequestParam(value = "page", defaultValue = "1") Integer page,
-                                                        @RequestParam(value = "size", defaultValue = "10") Integer size) {
-        return ResponseEntity.ok(roomService.pagination(page, size));
+                                                        @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                        @RequestParam(value = "hotelId") Long hotelId) {
+        return ResponseEntity.ok(roomService.pagination(hotelId, page, size));
     }
 }

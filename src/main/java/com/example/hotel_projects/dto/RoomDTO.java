@@ -12,12 +12,12 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RoomDTO {
     private Long id;
-    private   String name;
+  //  private   String name;
     private String roomNumber;
     private Integer capacity;
     private Double price;
     private String status;
     private RoomType type;
-    private HotelEntity hotel_id;
+    private Long hotel_id;
     private LocalDateTime createdAt;
 }

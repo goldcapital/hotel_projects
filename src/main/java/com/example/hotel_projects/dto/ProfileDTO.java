@@ -3,7 +3,7 @@ package com.example.hotel_projects.dto;
 
 
 import com.example.hotel_projects.enums.ProfileRole;
-import com.example.hotel_projects.enums.ProfileStatus;
+import com.example.hotel_projects.enums.Status;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -17,6 +17,6 @@ public class ProfileDTO {
     private String name;
     private  String password;
     private ProfileRole role;
-    private ProfileStatus status;
+    private Status status;
     private  String jwtToken;
 }

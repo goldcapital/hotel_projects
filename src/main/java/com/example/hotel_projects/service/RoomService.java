@@ -6,10 +6,11 @@ import com.example.hotel_projects.dto.request.RoomRequestDto;
 import com.example.hotel_projects.entity.HotelEntity;
 import com.example.hotel_projects.entity.RoomEntity;
 import com.example.hotel_projects.enums.AppLanguage;
-import com.example.hotel_projects.enums.ProfileStatus;
+import com.example.hotel_projects.enums.Status;
 import com.example.hotel_projects.enums.RoomType;
 import com.example.hotel_projects.exp.AppBadException;
 import com.example.hotel_projects.repository.RoomRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -25,25 +26,26 @@ public class RoomService {
 
     public RoomDTO createRoom(RoomRequestDto dto, AppLanguage appLanguage) {
 
-        return (RoomDTO) roomRepository.findByHotelIdAndRoomNumber(dto.getHotelId(), dto.getRoomNumber())
+        return (RoomDTO) roomRepository.findByHotel_idAndRoomNumber(dto.getHotelId(), dto.getRoomNumber())
                 .map(room -> {
                     throw new AppBadException(resourceBundleService
-                            .getMessage("this.hotel.has.this.digital.room",appLanguage));
+                            .getMessage("this.hotel.has.this.digital.room", appLanguage));
                 })
-                            . orElseGet(() -> toRoomDto(roomRepository.save(toEntity(dto))));
+                .orElseGet(() -> toRoomDto(roomRepository.save(toEntity(dto))));
     }
-    public List<RoomDTO> getRoomAll() {
-       return roomRepository.findAll()
-               .stream()
-               .map(this::toRoomDto)
-               .toList();
+
+    public List<RoomDTO> getRoomAll(Long hotelId) {
+        return roomRepository.findAllByVisibleAndHotel_id(true, hotelId)
+                .stream()
+                .map(this::toRoomDto)
+                .toList();
     }
 
     public RoomDTO getRoomByNumber(String number, AppLanguage appLanguage) {
 
-       return roomRepository.findByRoomNumber(number).map(this::toRoomDto)
-               .orElseThrow(()->new AppBadException(resourceBundleService
-                       .getMessage("this.hotel.has.this.digital.room",appLanguage)));
+        return roomRepository.findByRoomNumber(number).map(this::toRoomDto)
+                .orElseThrow(() -> new AppBadException(resourceBundleService
+                        .getMessage("this.hotel.has.this.digital.room", appLanguage)));
     }
 
     public List<RoomEntity> getRoomList(List<RoomCreateRequest> roomList, Long id) {
@@ -52,19 +54,16 @@ public class RoomService {
         for (RoomCreateRequest roomCreateRequest : roomList) {
 
             if (roomCreateRequest != null) {
-                boolean exists = roomRepository.existsByHotelIdAndRoomNumber(id,roomCreateRequest.getRoomNumber());
+                boolean exists = roomRepository.existsByHotel_idAndRoomNumber(id, roomCreateRequest.getRoomNumber());
                 if (!exists) {
                     RoomEntity roomEntity = new RoomEntity();
 
-                    HotelEntity hotelEntity = new HotelEntity();
-                    hotelEntity.setId(id);
-
-                    roomEntity.setHotel(hotelEntity);
+                    roomEntity.setHotel_id(id);
                     roomEntity.setRoomNumber(roomCreateRequest.getRoomNumber());
                     roomEntity.setCapacity(roomCreateRequest.getCapacity());
                     roomEntity.setType(roomCreateRequest.getRoomType());
                     roomEntity.setPrice(roomCreateRequest.getPrice());
-                    roomEntity.setStatus(ProfileStatus.ACTIVE);
+                    roomEntity.setStatus(Status.ACTIVE);
 
 
                     entityList.add(roomEntity);
@@ -96,35 +95,36 @@ public class RoomService {
                 .toList();
     }
 
-    public Boolean updateRoom(String roomNumber, RoomDTO dto, Long hotelId, AppLanguage appLanguage) {
-        return  roomRepository.findByHotelIdAndRoomNumber(hotelId,roomNumber).
+    public Boolean updateRoom(String roomNumber, @Valid  RoomDTO dto, Long hotelId, AppLanguage appLanguage) {
+        return roomRepository.findByHotel_idAndRoomNumber(hotelId, roomNumber).
                 map(roomEntity -> {
 
                     roomEntity.setRoomNumber(dto.getRoomNumber());
                     roomEntity.setCapacity(dto.getCapacity());
                     roomEntity.setType(dto.getType());
                     roomEntity.setPrice(dto.getPrice());
-                    return  true;
+                    roomRepository.save(roomEntity);
+                    return true;
                 })
-                .orElseThrow(()->new AppBadException(resourceBundleService.getMessage("this.hotel.has.this.digital.room",appLanguage)));
+                .orElseThrow(() -> new AppBadException(resourceBundleService.getMessage("this.hotel.has.this.digital.room", appLanguage)));
     }
 
     public Boolean deleteRoom(String number, Long hotelId, AppLanguage appLanguage) {
-        return  roomRepository.findByHotelIdAndRoomNumber(hotelId,number).map
-                (roomEntity-> {
+        return roomRepository.findByHotel_idAndRoomNumber(hotelId, number).map
+                (roomEntity -> {
                     roomRepository.deleteByHotelIdAndRoomNumber(hotelId, number);
                     return true;
-                } ).orElseThrow(()->new AppBadException(resourceBundleService.getMessage("this.hotel.has.this.digital.room",appLanguage)));
+                }).orElseThrow(() -> new AppBadException(resourceBundleService.getMessage("this.hotel.has.this.digital.room", appLanguage)));
 
 
     }
 
-    public PageImpl<RoomDTO> pagination(Integer page, Integer size) {
+    public PageImpl<RoomDTO> pagination(Long hotelId, Integer page, Integer size) {
 
         Sort sort = Sort.by(Sort.Direction.DESC, "creationDate");
         Pageable paging = PageRequest.of(page - 1, size, sort);
 
-        Page<RoomEntity> studentPage = roomRepository.findAll(paging);
+        Page<RoomEntity> studentPage = roomRepository.findAllByHotel_id(hotelId, paging);
 
         List<RoomEntity> entityList = studentPage.getContent();
         Long totalElements = studentPage.getTotalElements();
@@ -136,19 +136,17 @@ public class RoomService {
         return new PageImpl<>(dtoList, paging, totalElements);
     }
 
-    private RoomEntity toEntity(RoomRequestDto dto){
+    private RoomEntity toEntity(RoomRequestDto dto) {
 
-        HotelEntity hotelEntity = new HotelEntity();
-        hotelEntity.setId(dto.getHotelId());
 
-        RoomEntity roomEntity=new RoomEntity();
+        RoomEntity roomEntity = new RoomEntity();
 
-        roomEntity.setHotel(hotelEntity);
+        roomEntity.setHotel_id(dto.getHotelId());
         roomEntity.setRoomNumber(dto.getRoomNumber());
         roomEntity.setCapacity(dto.getCapacity());
         roomEntity.setType(dto.getRoomType());
         roomEntity.setPrice(dto.getPrice());
-        roomEntity.setStatus(ProfileStatus.ACTIVE);
+        roomEntity.setStatus(Status.ACTIVE);
         roomEntity.setType(getRoomType(dto.getRoomType()));
 
         return roomEntity;
@@ -158,6 +156,7 @@ public class RoomService {
 
         RoomDTO roomDto = new RoomDTO();
         roomDto.setId(roomEntity.getId());
+        roomDto.setHotel_id(roomEntity.getHotel_id());
         roomDto.setRoomNumber(roomEntity.getRoomNumber());
         roomDto.setType(roomEntity.getType());
         roomDto.setType(roomEntity.getType());
@@ -166,5 +165,37 @@ public class RoomService {
         roomDto.setCreatedAt(roomEntity.getCreationDate());
         roomDto.setStatus(String.valueOf(roomEntity.getStatus()));
         return roomDto;
+    }
+
+    public Boolean updateRoomNumberAndHotelIdAndStatus(String roomNumber, Long hotelId, Status profileStatus, AppLanguage appLanguage) {
+        Optional<RoomEntity> optional = roomRepository.findByHotel_idAndRoomNumber(hotelId, roomNumber);
+        if (optional.isPresent()) {
+            RoomEntity roomEntity = optional.get();
+            roomEntity.setStatus(profileStatus);
+            roomRepository.save(roomEntity);
+            return true;
+        }
+       throw  new AppBadException(resourceBundleService.getMessage("", appLanguage));
+    }
+
+    public RoomEntity getRoomByHotelIdAndRoomId(Long hotelId, Long roomId, AppLanguage appLanguage) {
+   Optional<RoomEntity>optional=roomRepository.findByHotel_idAndId(hotelId, roomId);
+   if (optional.isPresent()){
+       return optional.get();
+   }
+
+                throw  new AppBadException(resourceBundleService
+                        .getMessage("this.hotel.has.this.digital.room", appLanguage));
+
+
+    }
+
+    public void updateRoomIdAndHotilId(Long hotelId, Long roomId, Status profileStatus) {
+        Optional<RoomEntity>optional=roomRepository.findByHotel_idAndId(hotelId,roomId);
+        if(optional.isPresent()){
+            RoomEntity roomEntity=optional.get();
+            roomEntity.setStatus(profileStatus);
+            roomRepository.save(roomEntity);
+        }
     }
 }

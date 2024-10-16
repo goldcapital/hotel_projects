@@ -18,25 +18,30 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class AuthController {
     private final AuthService authService;
-
-    @PostMapping("/loge")
-    @Operation(summary = "Api for login", description = "this api used for authorization")
-    public ResponseEntity<ProfileDTO>loge(@RequestBody ProfileLoginRequestDTO dto,
-                                          @RequestHeader(value = "Accept-Language",
-                                                  defaultValue = "uz") AppLanguage appLanguage){
-        log.info("loge",dto.getEmail());
-        return ResponseEntity.ok( authService.loge(dto,appLanguage));
+    @GetMapping("/admin-token")
+    public ResponseEntity<ProfileDTO>tokenAdmin(  @RequestHeader(value = "Accept-Language",
+            defaultValue = "uz") AppLanguage appLanguage){
+        return ResponseEntity.ok(authService.getAdminToken(appLanguage));
     }
 
-    @Operation(summary = "Api for email  registration",description = "this api used for registration email")
+    @PostMapping("/login")
+    @Operation(summary = "Api for login", description = "this api used for authorization")
+    public ResponseEntity<ProfileDTO> loge(@RequestBody ProfileLoginRequestDTO dto,
+                                           @RequestHeader(value = "Accept-Language",
+                                                   defaultValue = "uz") AppLanguage appLanguage) {
+        log.info("loge", dto.getEmail());
+        return ResponseEntity.ok(authService.loge(dto, appLanguage));
+    }
+
+    @Operation(summary = "Api for email  registration", description = "this api used for registration email")
     @PostMapping("/registration/email")
     public ResponseEntity<String> registrationEmail(@RequestBody AuthRegistrationRequest dto,
-                                                        @RequestHeader(value = "Accept-Language", defaultValue = "uz") AppLanguage appLanguage) {
+                                                    @RequestHeader(value = "Accept-Language", defaultValue = "uz") AppLanguage appLanguage) {
         log.info("registration Email", dto.getEmail());
         return ResponseEntity.ok(authService.registrationEmail(dto, appLanguage));
     }
 
-   @Operation(summary = "Api for email code Verification",description = "this api used for verification email")
+    @Operation(summary = "Api for email code Verification", description = "this api used for verification email")
     @GetMapping("/verification/email/{id}")
     public ResponseEntity<Boolean> emailVerification(@PathVariable("id") String token) {
         return ResponseEntity.ok(authService.emailVerification(token));
@@ -44,7 +49,7 @@ public class AuthController {
 
     @Operation(summary = "API for granting email verification permission",
             description = "This API is used for confirming email verification permission by user Token.")
-   @GetMapping("/verification/email/permission/{id}")
+    @GetMapping("/verification/email/permission/{id}")
     public ResponseEntity<Boolean> emailVerificationPermission(@PathVariable("id") String token) {
         return ResponseEntity.ok(authService.emailVerificationPermission(token));
     }

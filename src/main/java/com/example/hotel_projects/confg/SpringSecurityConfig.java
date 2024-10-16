@@ -54,6 +54,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
             http.authorizeHttpRequests(authorizationManagerRequestMatcherRegistry -> {
                 authorizationManagerRequestMatcherRegistry
                         .requestMatchers(AUTH_WHITELIST).permitAll()
+                        .requestMatchers("/room/pagination").permitAll()
                         .anyRequest()
                         .authenticated();
             });

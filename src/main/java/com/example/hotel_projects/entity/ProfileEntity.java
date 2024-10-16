@@ -3,7 +3,7 @@ package com.example.hotel_projects.entity;
 
 
 import com.example.hotel_projects.enums.ProfileRole;
-import com.example.hotel_projects.enums.ProfileStatus;
+import com.example.hotel_projects.enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -29,7 +29,7 @@ public class ProfileEntity extends BastEntity{
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private ProfileStatus status;
+    private Status status;
 
     @Column(name = "is_logged_in")
     private boolean isLoggedIn;
