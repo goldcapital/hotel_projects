@@ -29,7 +29,6 @@ public class RoomController {
                                               @RequestHeader(value = "Accept-Language",
                                                       defaultValue = "uz") AppLanguage appLanguage) {
         return ResponseEntity.ok(roomService.createRoom(dto, appLanguage));
-
     }
 
     @GetMapping("/getAll/{hotelId}")

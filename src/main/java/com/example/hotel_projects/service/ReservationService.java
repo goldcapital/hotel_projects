@@ -67,12 +67,12 @@ public class ReservationService {
     private ReservationDto toDto(ReservationEntity reservationEntity) {
         ReservationDto reservationDto = new ReservationDto();
 
-        reservationDto.setId(reservationDto.getId());
+        reservationDto.setId(reservationEntity.getId());
         reservationDto.setCheckInDate(reservationEntity.getCheckInDate());
         reservationDto.setCheckOutDate(reservationEntity.getCheckOutDate());
         reservationDto.setGuestId(reservationEntity.getGuestId());
-        reservationDto.setRoomId(reservationDto.getRoomId());
-        reservationDto.setHotelId(reservationDto.getHotelId());
+        reservationDto.setRoomId(reservationEntity.getRoomId());
+        reservationDto.setHotelId(reservationEntity.getHotelId());
         return reservationDto;
 
     }
@@ -93,7 +93,7 @@ public class ReservationService {
         throw new AppBadException(resourceBundleService.getMessage("item.not.found", appLanguage));
     }
 
-    public ReservationDto returnUserReservations(ReturnUserReservationsDto dto, AppLanguage appLanguage) {
+    public Boolean returnUserReservations(ReturnUserReservationsDto dto, AppLanguage appLanguage) {
 
         Optional<ReservationEntity> optional = reservationRepository.findByIdAndHotelIdAndRoomIdAndGuestId(
                 dto.getReservationId(),
@@ -103,6 +103,7 @@ public class ReservationService {
         if (optional.isPresent()) {
             if (profileService.getByIdAndIsLoggedIn(SpringSecurityUtil.getCurrentUser().getEmail(), appLanguage)) {
                 roomService.updateRoomIdAndHotilId(dto.getHotelId(), dto.getRoomId(), Status.ACTIVE);
+                return true;
             }
         }
         throw new AppBadException(resourceBundleService.getMessage("item.not.found", appLanguage));

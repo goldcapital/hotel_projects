@@ -95,18 +95,32 @@ public class RoomService {
                 .toList();
     }
 
-    public Boolean updateRoom(String roomNumber, @Valid  RoomDTO dto, Long hotelId, AppLanguage appLanguage) {
+    public Boolean updateRoom(String roomNumber, @Valid RoomDTO dto, Long hotelId, AppLanguage appLanguage) {
         return roomRepository.findByHotel_idAndRoomNumber(hotelId, roomNumber).
                 map(roomEntity -> {
 
-                    roomEntity.setRoomNumber(dto.getRoomNumber());
-                    roomEntity.setCapacity(dto.getCapacity());
-                    roomEntity.setType(dto.getType());
-                    roomEntity.setPrice(dto.getPrice());
+                    if (dto.getRoomNumber() != null) {
+                        roomEntity.setRoomNumber(dto.getRoomNumber());
+                    }
+                    if (dto.getCapacity() != 0) {
+                        roomEntity.setCapacity(dto.getCapacity());
+                    }
+                    if (dto.getType() != null) {
+                        roomEntity.setType(dto.getType());
+                    }
+
+                    if (dto.getPrice() != 0) {
+                        roomEntity.setPrice(dto.getPrice());
+
+                    }
+                    if (dto.getStatus() != null) {
+                        roomEntity.setStatus(dto.getStatus());
+                    }
                     roomRepository.save(roomEntity);
                     return true;
                 })
-                .orElseThrow(() -> new AppBadException(resourceBundleService.getMessage("this.hotel.has.this.digital.room", appLanguage)));
+                .orElseThrow(() ->
+                        new AppBadException(resourceBundleService.getMessage("this.hotel.has.this.digital.room", appLanguage)));
     }
 
     public Boolean deleteRoom(String number, Long hotelId, AppLanguage appLanguage) {
@@ -114,7 +128,8 @@ public class RoomService {
                 (roomEntity -> {
                     roomRepository.deleteByHotelIdAndRoomNumber(hotelId, number);
                     return true;
-                }).orElseThrow(() -> new AppBadException(resourceBundleService.getMessage("this.hotel.has.this.digital.room", appLanguage)));
+                }).orElseThrow(()
+                -> new AppBadException(resourceBundleService.getMessage("this.hotel.has.this.digital.room", appLanguage)));
 
 
     }
@@ -163,7 +178,7 @@ public class RoomService {
         roomDto.setPrice(roomEntity.getPrice());
         roomDto.setCapacity(roomDto.getCapacity());
         roomDto.setCreatedAt(roomEntity.getCreationDate());
-        roomDto.setStatus(String.valueOf(roomEntity.getStatus()));
+        roomDto.setStatus(roomEntity.getStatus());
         return roomDto;
     }
 
@@ -175,25 +190,25 @@ public class RoomService {
             roomRepository.save(roomEntity);
             return true;
         }
-       throw  new AppBadException(resourceBundleService.getMessage("", appLanguage));
+        throw new AppBadException(resourceBundleService.getMessage("", appLanguage));
     }
 
     public RoomEntity getRoomByHotelIdAndRoomId(Long hotelId, Long roomId, AppLanguage appLanguage) {
-   Optional<RoomEntity>optional=roomRepository.findByHotel_idAndId(hotelId, roomId);
-   if (optional.isPresent()){
-       return optional.get();
-   }
+        Optional<RoomEntity> optional = roomRepository.findByHotel_idAndId(hotelId, roomId);
+        if (optional.isPresent()) {
+            return optional.get();
+        }
 
-                throw  new AppBadException(resourceBundleService
-                        .getMessage("this.hotel.has.this.digital.room", appLanguage));
+        throw new AppBadException(resourceBundleService
+                .getMessage("this.hotel.has.this.digital.room", appLanguage));
 
 
     }
 
     public void updateRoomIdAndHotilId(Long hotelId, Long roomId, Status profileStatus) {
-        Optional<RoomEntity>optional=roomRepository.findByHotel_idAndId(hotelId,roomId);
-        if(optional.isPresent()){
-            RoomEntity roomEntity=optional.get();
+        Optional<RoomEntity> optional = roomRepository.findByHotel_idAndId(hotelId, roomId);
+        if (optional.isPresent()) {
+            RoomEntity roomEntity = optional.get();
             roomEntity.setStatus(profileStatus);
             roomRepository.save(roomEntity);
         }

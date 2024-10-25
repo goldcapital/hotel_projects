@@ -29,6 +29,7 @@ public interface ReservationRepository extends JpaRepository<ReservationEntity, 
     @Query("update  ReservationEntity set visible =:visible where id =:reservationId")
     void updateByIdAndVisible(@Param("reservationId") Long reservationId, @Param("visible") boolean b);
 
+
     Optional<ReservationEntity> findByIdAndHotelIdAndRoomIdAndGuestId(Long reservationId, Long hotelId, Long roomId, String id);
 
     Page<ReservationEntity> findAllByHotelId(Long hotelId,Pageable paging);

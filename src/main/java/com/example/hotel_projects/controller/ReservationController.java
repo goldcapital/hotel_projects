@@ -51,7 +51,7 @@ public class ReservationController {
     }
 
     @PutMapping("/return/{reservationId}")
-    public ResponseEntity<ReservationDto> returnUserReservations(@RequestBody ReturnUserReservationsDto dto,
+    public ResponseEntity<Boolean> returnUserReservations(@RequestBody ReturnUserReservationsDto dto,
                                                                  @RequestHeader(value = "Accept-Language",
                                                                          defaultValue = "uz") AppLanguage appLanguage) {
         return ResponseEntity.ok(reservationService.returnUserReservations(dto, appLanguage));

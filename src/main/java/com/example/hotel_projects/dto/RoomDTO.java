@@ -2,6 +2,7 @@ package com.example.hotel_projects.dto;
 
 import com.example.hotel_projects.entity.HotelEntity;
 import com.example.hotel_projects.enums.RoomType;
+import com.example.hotel_projects.enums.Status;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,7 +17,7 @@ public class RoomDTO {
     private String roomNumber;
     private Integer capacity;
     private Double price;
-    private String status;
+    private Status status;
     private RoomType type;
     private Long hotel_id;
     private LocalDateTime createdAt;
